@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
-# Quick dev script: stream SSH logs using Python
-set -e  # Exit on error
+set -e
 
 python3 - << 'EOF'
-from sentinel.ingest import stream_ssh_logs  # Import the log streamer
-from sentinel.parser import parse_ssh_log  # Import the log parser
+from sentinel.ingest import stream_ssh_logs
+from sentinel.parser import parse_ssh_log
+from sentinel.detector import process_event
 
-for line in stream_ssh_logs():  # Print each log line as it arrives
-    event = parse_ssh_log(line)  # Parse the log line
-    if event:  # If parsing was successful
-        print(line)
+for line in stream_ssh_logs():
+    event = parse_ssh_log(line)
+    if not event:
+        continue
+
+    alert = process_event(event)
+    if alert:
+        print("ALERT:", alert)
 EOF
