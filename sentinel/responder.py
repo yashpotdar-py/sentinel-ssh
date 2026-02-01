@@ -4,6 +4,9 @@ import time  # For timestamps and expiration
 import ipaddress  # For IP/network validation
 from typing import List  # Type hint for lists
 
+from sentinel.ui import red, green
+
+
 # Global dict: IP -> expiration timestamp
 blocked_ips = {}
 
@@ -47,6 +50,7 @@ def block_ip(ip: str, duration: int, allowlist: List[str]):
 
     # Record expiration time
     blocked_ips[ip] = time.time() + duration
+    print(red(f"[BLOCK] SSH brute-force detected from {ip}"), flush=True)
 
 
 def unblock_expired():
@@ -64,3 +68,5 @@ def unblock_expired():
         )
         # Remove from tracking
         del blocked_ips[ip]
+        print(green(f"[UNBLOCK] Cooldown expired for {ip}"), flush=True)
+

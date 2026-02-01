@@ -3,6 +3,9 @@ from sentinel.parser import parse_ssh_log
 from sentinel.detector import process_event
 from sentinel.responder import block_ip, unblock_expired
 from sentinel.config import load_config
+from sentinel.banner import BANNER
+
+print(BANNER, flush=True)
 
 
 def main():
