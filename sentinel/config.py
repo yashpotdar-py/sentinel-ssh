@@ -1,7 +1,14 @@
-import yaml
+# sentinel/config.py
+
+"""
+Configuration loader.
+Reads and parses the YAML configuration file.
+"""
+
 import logging
 from pathlib import Path
 from typing import Dict, Any
+import yaml
 
 # Configure module-level logger
 logger = logging.getLogger(__name__)
@@ -24,14 +31,14 @@ def load_config() -> Dict[str, Any]:
         yaml.YAMLError: If the config file is invalid.
     """
     try:
-        logger.debug(f"Loading configuration from {CONFIG_PATH}")
-        with open(CONFIG_PATH) as f:
+        logger.debug("Loading configuration from %s", CONFIG_PATH)
+        with open(CONFIG_PATH, encoding="utf-8") as f:
             config = yaml.safe_load(f)
             logger.info("Configuration loaded successfully.")
             return config
     except FileNotFoundError:
-        logger.critical(f"Configuration file not found at {CONFIG_PATH}")
+        logger.critical("Configuration file not found at %s", CONFIG_PATH)
         raise
     except yaml.YAMLError as e:
-        logger.critical(f"Failed to parse configuration file: {e}")
+        logger.critical("Failed to parse configuration file: %s", e)
         raise

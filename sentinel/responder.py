@@ -1,3 +1,10 @@
+# sentinel/responder.py
+
+"""
+Response module.
+Handles blocking and unblocking IPs using UFW.
+"""
+
 # SSH responder: block suspicious IPs using UFW firewall
 import subprocess  # To run system commands like ufw
 import time  # For timestamps and expiration
@@ -42,22 +49,22 @@ def block_ip(ip: str, duration: int, allowlist: List[str]):
         allowlist (List[str]): IPs/networks to never block.
     """
     if ip in blocked_ips:  # Already blocked
-        logger.debug(f"Skipping block for {ip} (already blocked)")
+        logger.debug("Skipping block for %s (already blocked)", ip)
         return
 
     if ip_in_allowlist(ip, allowlist):  # Skip allowed IPs
-        logger.warning(f"Skipping block for {ip} (in allowlist)")
+        logger.warning("Skipping block for %s (in allowlist)", ip)
         return
 
     # Add UFW deny rule for SSH (port 22)
-    logger.info(f"Blocking {ip} for {duration} seconds via UFW")
+    logger.info("Blocking %s for %s seconds via UFW", ip, duration)
     try:
         subprocess.run(["ufw", "deny", "from", ip, "to", "any", "port", "22"], check=True)
         # Record expiration time
         blocked_ips[ip] = time.time() + duration
         print(red(f"[BLOCK] SSH brute-force detected from {ip}"), flush=True)
     except subprocess.CalledProcessError as e:
-        logger.error(f"Failed to execute UFW command: {e}")
+        logger.error("Failed to execute UFW command: %s", e)
 
 
 def unblock_expired():
@@ -70,7 +77,7 @@ def unblock_expired():
 
     for ip in expired:
         # Remove UFW rule
-        logger.info(f"Unblocking {ip} (expired)")
+        logger.info("Unblocking %s (expired)", ip)
         try:
             subprocess.run(
                 ["ufw", "delete", "deny", "from", ip, "to", "any", "port", "22"], check=True
@@ -79,5 +86,5 @@ def unblock_expired():
             del blocked_ips[ip]
             print(green(f"[UNBLOCK] Cooldown expired for {ip}"), flush=True)
         except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to remove UFW rule for {ip}: {e}")
+            logger.error("Failed to remove UFW rule for %s: %s", ip, e)
 

@@ -1,3 +1,10 @@
+# sentinel/main.py
+
+"""
+Main entry point for Sentinel-SSH.
+Orchestrates log ingestion, parsing, detection, and response.
+"""
+
 import logging
 import sys
 from sentinel.ingest import stream_ssh_logs
@@ -31,18 +38,18 @@ def main():
     """
     try:
         config = load_config()
-    except Exception as e:
-        logger.critical(f"Failed to load config: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.critical("Failed to load config: %s", e)
         sys.exit(1)
 
     allowlist = config.get("allowlist", [])
-    
+
     # Get block duration, default to 300 seconds (5 minutes) if not set
     block_duration = config.get("ssh", {}).get("block_duration_seconds", 300)
-    
+
     logger.info("Sentinel-SSH starting up...")
-    logger.info(f"Block duration: {block_duration}s")
-    logger.info(f"Allowlist: {allowlist}")
+    logger.info("Block duration: %ss", block_duration)
+    logger.info("Allowlist: %s", allowlist)
 
     try:
         for line in stream_ssh_logs():
@@ -57,8 +64,8 @@ def main():
             unblock_expired()
     except KeyboardInterrupt:
         logger.info("Shutting down gracefully...")
-    except Exception as e:
-        logger.exception(f"Unexpected error: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.exception("Unexpected error: %s", e)
         sys.exit(1)
 
 

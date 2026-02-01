@@ -1,3 +1,10 @@
+# sentinel/ingest.py
+
+"""
+Log ingestion module.
+Responsible for reading SSH logs from systemd journal in real-time.
+"""
+
 # I'm learning how to work with subprocesses and log streaming in Python.
 # This file is about reading SSH logs in real time from systemd's journal.
 
@@ -22,19 +29,20 @@ def stream_ssh_logs() -> Iterator[str]:
     # -f: follow (like tail -f)
     # -o short: short output format
     cmd = [
-        "journalctl",      # journalctl is the systemd log viewer
-        "-u", "ssh",       # -u specifies the unit (ssh service)
-        "-f",              # -f means follow new log entries
-        "-o", "short"      # -o short gives a compact output
+        "journalctl",
+        "-u", "ssh",
+        "-f",
+        "-o", "short"
     ]
 
-    logger.info(f"Starting log stream with command: {' '.join(cmd)}")
+    logger.info("Starting log stream with command: %s", ' '.join(cmd))
 
     # Start the subprocess to run the command above
     # stdout=subprocess.PIPE: capture the output so we can read it in Python
     # stderr=subprocess.PIPE: also capture errors (not used here, but good practice)
     # text=True: get strings instead of bytes
     try:
+        # pylint: disable=consider-using-with
         process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,

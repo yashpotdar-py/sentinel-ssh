@@ -1,3 +1,10 @@
+# sentinel/parser.py
+
+"""
+Log parsing logic.
+Extracts structured events (login success, failure, invalid user) from raw log lines.
+"""
+
 # SSH log parser: extract structured events from log lines
 import re  # For regular expressions
 import logging
@@ -35,7 +42,7 @@ def parse_ssh_log(line: str) -> Optional[Dict]:
 
     # Check for successful publickey authentication
     if match := ACCEPTED_PUBLICKEY.search(line):
-        logger.debug(f"Computed auth_success for {match.group('user')}")
+        logger.debug("Computed auth_success for %s", match.group('user'))
         return {
             "event": "auth_success",  # Successful login
             "username": match.group("user"),
@@ -45,7 +52,10 @@ def parse_ssh_log(line: str) -> Optional[Dict]:
 
     # Check for failed password attempt
     if match := FAILED_PASSWORD.search(line):
-        logger.debug(f"Computed auth_failed for {match.group('user')} from {match.group('ip')}")
+        logger.debug(
+            "Computed auth_failed for %s from %s",
+            match.group('user'), match.group('ip')
+        )
         return {
             "event": "auth_failed",  # Failed login
             "username": match.group("user"),
@@ -55,7 +65,10 @@ def parse_ssh_log(line: str) -> Optional[Dict]:
 
     # Check for invalid user attempt
     if match := INVALID_USER.search(line):
-        logger.debug(f"Computed invalid_user for {match.group('user')} from {match.group('ip')}")
+        logger.debug(
+            "Computed invalid_user for %s from %s",
+            match.group('user'), match.group('ip')
+        )
         return {
             "event": "invalid_user",  # Login attempt for non-existent user
             "username": match.group("user"),

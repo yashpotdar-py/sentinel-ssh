@@ -1,4 +1,10 @@
-# Track SSH events per IP within a time window
+# sentinel/state.py
+
+"""
+Event state tracking.
+Keeps track of events per IP within a sliding time window.
+"""
+
 import time  # For timestamps
 import logging
 from collections import defaultdict, deque  # For efficient IP tracking
@@ -20,9 +26,11 @@ class EventState:
         """
         self.window = window_seconds  # Sliding window duration
         self.events = defaultdict(deque)  # IP -> deque of timestamps
-        logger.debug(f"Initialized EventState with window={window_seconds}s")
+        logger.debug("Initialized EventState with window=%ss", window_seconds)
 
-    def record(self, ip: str) -> int:
+    def get_count(self, ip: str) -> int:
+        """Return the current count for an IP without modifying state."""
+        return len(self.events[ip])
         """
         Record a new event for the given IP and return the current count in the window.
 
@@ -41,10 +49,14 @@ class EventState:
         while dq and now - dq[0] > self.window:
             dq.popleft()
             cleaned += 1
-        
+
         if cleaned > 0:
-            logger.debug(f"Expired {cleaned} old events for {ip}")
+            logger.debug("Expired %d old events for %s", cleaned, ip)
 
         count = len(dq)
-        logger.debug(f"Recorded event for {ip}. Count in window: {count}")
+        logger.debug("Recorded event for %s. Count in window: %d", ip, count)
         return count  # Return count of events in window
+
+    def get_count(self, ip: str) -> int:
+        """Return the current count for an IP without modifying state."""
+        return len(self.events[ip])
