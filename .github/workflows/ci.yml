@@ -27,7 +27,7 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install .
         # Install dev tools if not present in generic setup
-        pip install pytest ruffle pylint
+        pip install pytest ruff pylint
 
     - name: Lint with pylint
       run: |
