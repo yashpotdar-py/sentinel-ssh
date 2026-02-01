@@ -1,0 +1,42 @@
+name: Feature Request
+description: "You have an idea that might make this less minimal."
+title: "[FEAT]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You want to add something? Okay, pitch it to me. 
+        Remember: This tool detects SSH attacks. It does not make coffee.
+
+  - type: textarea
+    id: pitch
+    attributes:
+      label: The Pitch
+      description: What problem does this solve? Why is the current solution inadequate?
+      placeholder: "Fail2Ban is too heavy because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How should it work?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What else did you try? Why didn't it work?
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      options:
+        - "It would be nice."
+        - "I need this for my niche setup."
+        - "This is critical for humanity's survival."

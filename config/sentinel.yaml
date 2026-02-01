@@ -1,8 +1,17 @@
+# sentinel-ssh configuration
+# Don't mess this up, or you might lock yourself out.
+
 ssh:
+  # How many failed attempts before we bring down the hammer?
   block_threshold: 5
+  
+  # How long to block the IP (in seconds)?
+  # 300 = 5 minutes. Enough for them to get bored.
   block_duration_seconds: 300
 
 allowlist:
+  # IPs that can do no wrong.
+  # Add your own IP here immediately.
   - 127.0.0.1
   - ::1
-  - 192.168.1.0/24
+  - 192.168.1.0/24  # Local subnet

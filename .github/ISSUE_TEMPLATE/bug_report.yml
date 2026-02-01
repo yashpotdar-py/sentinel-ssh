@@ -1,0 +1,62 @@
+name: Bug Report
+description: "Something is broken and it's definitely not my fault (maybe)."
+title: "[BUG]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report. 
+        Please verify that you are not just holding it wrong.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug. Be descriptive.
+      placeholder: "I ran the thing and it exploded..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How can I reproduce it?
+      description: Steps to reproduction. If I can't reproduce it, I'm marking it strictly "works on my machine".
+      placeholder: |
+        1. Run 'sentinel ...'
+        2. Do '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "Paste the relevant logs aka the traceback. Do not screenshot text."
+      render: shell
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: OS / Environment
+      options:
+        - Ubuntu 22.04
+        - Ubuntu 20.04
+        - Debian 11/12
+        - Arch Linux (btw)
+        - Other (specify in comments)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: The "I actually read the docs" checklist
+      options:
+        - label: I strictly followed the setup instructions in README.
+        - label: I checked existing issues to avoid duplicates.
+        - label: I am not running this on Windows (it's a Linux tool, genius).
