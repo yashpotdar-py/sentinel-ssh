@@ -1,0 +1,17 @@
+[Unit]
+Description=Sentinel SSH Intrusion Detection
+After=network.target ssh.service
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/miriel/sentinel-ssh/sentinel/main.py
+Restart=always
+RestartSec=5
+User=root
+WorkingDirectory=/home/miriel/sentinel-ssh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
