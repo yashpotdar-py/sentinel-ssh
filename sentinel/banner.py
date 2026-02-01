@@ -1,3 +1,10 @@
+"""
+banner.py
+
+Just a big ASCII art text to make the startup look cool.
+Prioritize style over substance here.
+"""
+
 BANNER = r"""
    ███████╗███████╗███╗   ██╗████████╗██╗███╗   ██╗███████╗██╗
    ██╔════╝██╔════╝████╗  ██║╚══██╔══╝██║████╗  ██║██╔════╝██║

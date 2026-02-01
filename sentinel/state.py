@@ -1,7 +1,9 @@
 # Track SSH events per IP within a time window
 import time  # For timestamps
+import logging
 from collections import defaultdict, deque  # For efficient IP tracking
 
+logger = logging.getLogger(__name__)
 
 class EventState:
     """
@@ -18,6 +20,7 @@ class EventState:
         """
         self.window = window_seconds  # Sliding window duration
         self.events = defaultdict(deque)  # IP -> deque of timestamps
+        logger.debug(f"Initialized EventState with window={window_seconds}s")
 
     def record(self, ip: str) -> int:
         """
@@ -34,7 +37,14 @@ class EventState:
         dq.append(now)  # Add new timestamp
 
         # Remove timestamps older than the window
+        cleaned = 0
         while dq and now - dq[0] > self.window:
             dq.popleft()
+            cleaned += 1
+        
+        if cleaned > 0:
+            logger.debug(f"Expired {cleaned} old events for {ip}")
 
-        return len(dq)  # Return count of events in window
+        count = len(dq)
+        logger.debug(f"Recorded event for {ip}. Count in window: {count}")
+        return count  # Return count of events in window

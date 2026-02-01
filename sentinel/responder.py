@@ -2,10 +2,12 @@
 import subprocess  # To run system commands like ufw
 import time  # For timestamps and expiration
 import ipaddress  # For IP/network validation
+import logging
 from typing import List  # Type hint for lists
 
 from sentinel.ui import red, green
 
+logger = logging.getLogger(__name__)
 
 # Global dict: IP -> expiration timestamp
 blocked_ips = {}
@@ -40,17 +42,22 @@ def block_ip(ip: str, duration: int, allowlist: List[str]):
         allowlist (List[str]): IPs/networks to never block.
     """
     if ip in blocked_ips:  # Already blocked
+        logger.debug(f"Skipping block for {ip} (already blocked)")
         return
 
     if ip_in_allowlist(ip, allowlist):  # Skip allowed IPs
+        logger.warning(f"Skipping block for {ip} (in allowlist)")
         return
 
     # Add UFW deny rule for SSH (port 22)
-    subprocess.run(["ufw", "deny", "from", ip, "to", "any", "port", "22"], check=True)
-
-    # Record expiration time
-    blocked_ips[ip] = time.time() + duration
-    print(red(f"[BLOCK] SSH brute-force detected from {ip}"), flush=True)
+    logger.info(f"Blocking {ip} for {duration} seconds via UFW")
+    try:
+        subprocess.run(["ufw", "deny", "from", ip, "to", "any", "port", "22"], check=True)
+        # Record expiration time
+        blocked_ips[ip] = time.time() + duration
+        print(red(f"[BLOCK] SSH brute-force detected from {ip}"), flush=True)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Failed to execute UFW command: {e}")
 
 
 def unblock_expired():
@@ -63,10 +70,14 @@ def unblock_expired():
 
     for ip in expired:
         # Remove UFW rule
-        subprocess.run(
-            ["ufw", "delete", "deny", "from", ip, "to", "any", "port", "22"], check=True
-        )
-        # Remove from tracking
-        del blocked_ips[ip]
-        print(green(f"[UNBLOCK] Cooldown expired for {ip}"), flush=True)
+        logger.info(f"Unblocking {ip} (expired)")
+        try:
+            subprocess.run(
+                ["ufw", "delete", "deny", "from", ip, "to", "any", "port", "22"], check=True
+            )
+            # Remove from tracking
+            del blocked_ips[ip]
+            print(green(f"[UNBLOCK] Cooldown expired for {ip}"), flush=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to remove UFW rule for {ip}: {e}")
 

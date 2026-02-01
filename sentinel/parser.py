@@ -1,7 +1,9 @@
 # SSH log parser: extract structured events from log lines
 import re  # For regular expressions
+import logging
 from typing import Optional, Dict  # For type hints
 
+logger = logging.getLogger(__name__)
 
 # Regex for failed password attempts (may include 'invalid user')
 FAILED_PASSWORD = re.compile(
@@ -33,6 +35,7 @@ def parse_ssh_log(line: str) -> Optional[Dict]:
 
     # Check for successful publickey authentication
     if match := ACCEPTED_PUBLICKEY.search(line):
+        logger.debug(f"Computed auth_success for {match.group('user')}")
         return {
             "event": "auth_success",  # Successful login
             "username": match.group("user"),
@@ -42,6 +45,7 @@ def parse_ssh_log(line: str) -> Optional[Dict]:
 
     # Check for failed password attempt
     if match := FAILED_PASSWORD.search(line):
+        logger.debug(f"Computed auth_failed for {match.group('user')} from {match.group('ip')}")
         return {
             "event": "auth_failed",  # Failed login
             "username": match.group("user"),
@@ -51,6 +55,7 @@ def parse_ssh_log(line: str) -> Optional[Dict]:
 
     # Check for invalid user attempt
     if match := INVALID_USER.search(line):
+        logger.debug(f"Computed invalid_user for {match.group('user')} from {match.group('ip')}")
         return {
             "event": "invalid_user",  # Login attempt for non-existent user
             "username": match.group("user"),

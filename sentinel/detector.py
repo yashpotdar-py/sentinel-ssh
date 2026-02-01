@@ -1,10 +1,11 @@
 # SSH brute force detector: monitor failed logins and flag suspicious IPs
+import logging
 from sentinel.state import EventState  # Import the event state tracker
 
 # Global state for tracking events per IP in a 60-second window
 state = EventState(window_seconds=60)
 THRESHOLD = 5  # Flag IP if 5+ failed attempts in window
-
+logger = logging.getLogger(__name__)
 
 def process_event(event: dict) -> dict | None:
     """
@@ -22,9 +23,11 @@ def process_event(event: dict) -> dict | None:
 
     # Record the event and get current count for this IP
     count = state.record(event["ip"])
+    logger.debug(f"Event for {event['ip']} recorded. Current count: {count}")
 
     # If count exceeds threshold, flag as suspected brute force
     if count >= THRESHOLD:
+        logger.warning(f"Threshold exceeded for {event['ip']} (count: {count})")
         return {
             "ip": event["ip"],
             "count": count,
