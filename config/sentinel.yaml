@@ -1,0 +1,8 @@
+ssh:
+  block_threshold: 5
+  block_duration_seconds: 300
+
+allowlist:
+  - 127.0.0.1
+  - ::1
+  - 192.168.1.0/24
