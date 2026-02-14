@@ -14,6 +14,7 @@ from sentinel.responder import block_ip, unblock_expired
 from sentinel.config import load_config
 from sentinel.banner import BANNER
 from sentinel.metrics import set_gauge
+from sentinel.metrics_server import start_metrics_server
 
 # Configure basic logging for the entire application
 logging.basicConfig(
@@ -36,6 +37,7 @@ def main():
     processing SSH logs from systemd.
     """
     set_gauge("sentinel_up", 1)  # Mark the service as up
+    start_metrics_server()
     try:
         config = load_config()
     except Exception as e:  # pylint: disable=broad-exception-caught
