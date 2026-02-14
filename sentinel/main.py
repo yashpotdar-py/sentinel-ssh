@@ -13,7 +13,7 @@ from sentinel.detector import process_event
 from sentinel.responder import block_ip, unblock_expired
 from sentinel.config import load_config
 from sentinel.banner import BANNER
-from sentinel.metrics import render, set_gauge
+from sentinel.metrics import set_gauge
 
 # Configure basic logging for the entire application
 logging.basicConfig(
