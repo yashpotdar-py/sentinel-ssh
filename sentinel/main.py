@@ -65,6 +65,8 @@ def main():
 
             unblock_expired()
 
+            print(render(), flush=True)  # Update metrics display after each event
+
     except KeyboardInterrupt:
         logger.info("Shutting down gracefully...")
         set_gauge("sentinel_up", 0)  # Mark the service as down
