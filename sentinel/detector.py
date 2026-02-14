@@ -39,6 +39,8 @@ def process_event(event: dict) -> dict | None:
     # If count exceeds threshold, flag as suspected brute force
     if count >= THRESHOLD:
         logger.warning("Threshold exceeded for %s (count: %d)", event["ip"], count)
+        # Track this as a unique attacking IP
+        inc_counter("unique_attacker_ips_total")
         return {"ip": event["ip"], "count": count, "reason": "ssh_bruteforce_suspected"}
 
     # No alert needed
