@@ -66,7 +66,40 @@ No dashboards. No databases. Just decisions.
 
 ---
 
-## 🚀 Usage
+## � Observability (v1.1.0+)
+
+Because "it's working fine" is not a metric.
+
+Sentinel-SSH exposes internal metrics via a local HTTP endpoint for Prometheus scraping.
+
+By default, metrics are available at:
+
+```
+http://127.0.0.1:9105/metrics
+```
+
+This endpoint is localhost-only. No authentication. No TLS.  
+It's designed to be scraped by Prometheus running on the same host.
+
+### Exported Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `sentinel_up` | gauge | 1 if Sentinel is running, 0 otherwise |
+| `ssh_failed_attempts_total` | counter | Total SSH authentication failures observed |
+| `unique_attacker_ips_total` | counter | Number of distinct IPs that have crossed the brute-force threshold during runtime |
+| `bans_total` | counter | Total number of firewall bans issued |
+| `active_bans` | gauge | Number of currently active bans |
+| `last_ban_timestamp` | gauge | Unix timestamp of most recent ban |
+
+**Note:**
+- Counters reset on service restart.
+- `unique_attacker_ips_total` tracks unique threshold-triggering IPs during the current runtime.
+- Firewall bans apply only to new connections. Existing SSH sessions are not terminated.
+
+---
+
+## �🚀 Usage
 
 ### Prerequisites
 
@@ -116,7 +149,48 @@ allowlist:
 ```
 
 ---
+## 🧠 Operational Model
 
+Sentinel-SSH works by:
+
+1. Monitoring systemd SSH logs via `journalctl`.
+2. Detecting repeated failed login attempts within a sliding time window.
+3. Issuing UFW deny rules for offending IPs.
+4. Automatically removing bans after a configurable duration.
+
+**Important:**
+- Bans block **new** incoming SSH connections.
+- Active SSH sessions are **not** forcibly terminated.
+- Detection is deterministic and threshold-based.
+- Metrics are in-memory and reset on restart.
+
+Think of it as a bouncer, not an assassin.
+
+---
+
+## 📡 Prometheus Integration
+
+Example Prometheus scrape configuration:
+
+```yaml
+scrape_configs:
+  - job_name: "sentinel-ssh"
+    static_configs:
+      - targets: ["127.0.0.1:9105"]
+```
+
+Grafana dashboards can be built using standard PromQL queries such as:
+
+```promql
+rate(ssh_failed_attempts_total[1m])
+bans_total
+active_bans
+unique_attacker_ips_total
+```
+
+Or if you prefer suffering, you can just `curl http://127.0.0.1:9105/metrics` and read the raw output like it's 1995.
+
+---
 ## ⚠️ Disclaimer
 
 I am a developer, not your lawyer or CISO.
