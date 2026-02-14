@@ -13,14 +13,13 @@ from sentinel.detector import process_event
 from sentinel.responder import block_ip, unblock_expired
 from sentinel.config import load_config
 from sentinel.banner import BANNER
+from sentinel.metrics import render, set_gauge
 
 # Configure basic logging for the entire application
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    handlers=[logging.StreamHandler(sys.stdout)],
 )
 
 logger = logging.getLogger(__name__)
@@ -36,10 +35,13 @@ def main():
     It loads configuration, sets up the block/allow lists, and enters an infinite loop
     processing SSH logs from systemd.
     """
+    set_gauge("sentinel_up", 1)  # Mark the service as up
+    render()  # Initial render to show the banner and initial metrics
     try:
         config = load_config()
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger.critical("Failed to load config: %s", e)
+        set_gauge("sentinel_up", 0)  # Mark the service as down
         sys.exit(1)
 
     allowlist = config.get("allowlist", [])
@@ -62,10 +64,13 @@ def main():
                 block_ip(alert["ip"], block_duration, allowlist)
 
             unblock_expired()
+
     except KeyboardInterrupt:
         logger.info("Shutting down gracefully...")
+        set_gauge("sentinel_up", 0)  # Mark the service as down
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger.exception("Unexpected error: %s", e)
+        set_gauge("sentinel_up", 0)  # Mark the service as down
         sys.exit(1)
 
 
