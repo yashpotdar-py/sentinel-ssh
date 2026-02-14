@@ -11,6 +11,7 @@ from collections import defaultdict, deque  # For efficient IP tracking
 
 logger = logging.getLogger(__name__)
 
+
 class EventState:
     """
     Tracks the number of events (e.g., failed logins) per IP address within a sliding time window.
@@ -31,6 +32,8 @@ class EventState:
     def get_count(self, ip: str) -> int:
         """Return the current count for an IP without modifying state."""
         return len(self.events[ip])
+
+    def record(self, ip: str) -> int:
         """
         Record a new event for the given IP and return the current count in the window.
 
@@ -56,7 +59,3 @@ class EventState:
         count = len(dq)
         logger.debug("Recorded event for %s. Count in window: %d", ip, count)
         return count  # Return count of events in window
-
-    def get_count(self, ip: str) -> int:
-        """Return the current count for an IP without modifying state."""
-        return len(self.events[ip])

@@ -13,6 +13,7 @@ import logging
 from typing import List  # Type hint for lists
 
 from sentinel.ui import red, green
+from sentinel.metrics import inc_counter, set_gauge
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,10 @@ def block_ip(ip: str, duration: int, allowlist: List[str]):
         subprocess.run(["ufw", "deny", "from", ip, "to", "any", "port", "22"], check=True)
         # Record expiration time
         blocked_ips[ip] = time.time() + duration
+        # Update metrics (after success)
+        inc_counter("bans_total")
+        set_gauge("active_bans", len(blocked_ips))
+        set_gauge("last_ban_timestamp", int(time.time()))
         print(red(f"[BLOCK] SSH brute-force detected from {ip}"), flush=True)
     except subprocess.CalledProcessError as e:
         logger.error("Failed to execute UFW command: %s", e)
@@ -84,6 +89,8 @@ def unblock_expired():
             )
             # Remove from tracking
             del blocked_ips[ip]
+            # Update metrics (after success)
+            set_gauge("active_bans", len(blocked_ips))
             print(green(f"[UNBLOCK] Cooldown expired for {ip}"), flush=True)
         except subprocess.CalledProcessError as e:
             logger.error("Failed to remove UFW rule for %s: %s", ip, e)

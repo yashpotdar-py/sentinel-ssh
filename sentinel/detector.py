@@ -7,11 +7,14 @@ Monitors failed logins and flags suspicious IPs based on thresholds.
 
 import logging
 from sentinel.state import EventState  # Import the event state tracker
+from sentinel.metrics import inc_counter
 
 # Global state for tracking events per IP in a 60-second window
 state = EventState(window_seconds=60)
 THRESHOLD = 5  # Flag IP if 5+ failed attempts in window
+flagged_ips = set()  # To track already flagged IPs
 logger = logging.getLogger(__name__)
+
 
 def process_event(event: dict) -> dict | None:
     """
@@ -27,18 +30,22 @@ def process_event(event: dict) -> dict | None:
     if event["event"] not in ("auth_failed", "invalid_user"):
         return None
 
+    # Increment total failed attempts metric
+    inc_counter("ssh_failed_attempts_total")
+
     # Record the event and get current count for this IP
     count = state.record(event["ip"])
-    logger.debug("Event for %s recorded. Current count: %d", event['ip'], count)
+    logger.debug("Event for %s recorded. Current count: %d", event["ip"], count)
 
     # If count exceeds threshold, flag as suspected brute force
     if count >= THRESHOLD:
-        logger.warning("Threshold exceeded for %s (count: %d)", event['ip'], count)
-        return {
-            "ip": event["ip"],
-            "count": count,
-            "reason": "ssh_bruteforce_suspected"
-        }
+        logger.warning("Threshold exceeded for %s (count: %d)", event["ip"], count)
+        ip = event["ip"]
+        if ip not in flagged_ips:
+            flagged_ips.add(ip)  # Mark this IP as flagged    
+            # Track this as a unique attacking IP
+            inc_counter("unique_attacker_ips_total")
+        return {"ip": event["ip"], "count": count, "reason": "ssh_bruteforce_suspected"}
 
     # No alert needed
     return None
