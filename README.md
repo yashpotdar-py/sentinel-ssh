@@ -1,5 +1,9 @@
 # sentinel-ssh 🛡️
 
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 > "If you come at the king, you best not miss."  
 > — Omar Little (and probably your server running this)
 
@@ -30,11 +34,9 @@ I built Sentinel-SSH because I wanted:
 
 It’s intentionally boring. That’s a feature.
 
-```
-
+```plaintext
 journald → parser → detector → responder → UFW
-
-````
+```
 
 - `journald` is the source of truth  
 - the parser extracts signal  
@@ -48,7 +50,7 @@ No dashboards. No databases. Just decisions.
 ## ✨ Features
 
 - **Real-time detection**  
-  Streams logs directly from `journalctl`. No polling files like a peasant.
+  Streams logs directly from `journalctl`, avoiding file polling.
 
 - **Smart-ish detection**  
   Sliding time window to catch brute-force and enumeration patterns.
@@ -66,7 +68,7 @@ No dashboards. No databases. Just decisions.
 
 ---
 
-## � Observability (v1.1.0+)
+## 📊 Observability (v1.1.0+)
 
 Because "it's working fine" is not a metric.
 
@@ -99,7 +101,7 @@ It's designed to be scraped by Prometheus running on the same host.
 
 ---
 
-## �🚀 Usage
+## 🚀 Usage
 
 ### Prerequisites
 
@@ -112,25 +114,23 @@ It's designed to be scraped by Prometheus running on the same host.
 ### Installation
 
 1. Clone the repo:
-   ```bash
-   git clone https://github.com/yashpotdar-py/sentinel-ssh.git
-   cd sentinel-ssh
-````
-
+    ```bash
+    git clone https://github.com/yashpotdar-py/  sentinel-ssh.git
+    cd sentinel-ssh
+    ```
+  
 2. Install dependencies:
-
-   ```bash
-   pip install -e .
-   ```
+    ```bash
+    pip install -e .
+    ```
 
 3. Configure your allowlist in `config/sentinel.yaml`.
    **Do this unless you enjoy locking yourself out.**
 
 4. Run it:
-
-   ```bash
-   sudo python3 -m sentinel.main
-   ```
+    ```bash
+    sudo python3 -m sentinel.main
+     ```
 
 ---
 
@@ -149,6 +149,7 @@ allowlist:
 ```
 
 ---
+
 ## 🧠 Operational Model
 
 Sentinel-SSH works by:
@@ -191,6 +192,7 @@ unique_attacker_ips_total
 Or if you prefer suffering, you can just `curl http://127.0.0.1:9105/metrics` and read the raw output like it's 1995.
 
 ---
+
 ## ⚠️ Disclaimer
 
 I am a developer, not your lawyer or CISO.

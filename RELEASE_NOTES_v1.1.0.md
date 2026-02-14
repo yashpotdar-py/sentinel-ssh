@@ -41,6 +41,19 @@ The metrics system is intentionally minimal:
 
 The implementation is ~50 lines of Python. It works. It's boring. That's the point.
 
+### Security Model
+
+Metrics endpoint security is intentionally minimal:
+
+- **Localhost-only binding**: Metrics server binds to `127.0.0.1:9105` exclusively
+- **No authentication**: Not needed for localhost-only services
+- **No TLS**: Not needed for localhost-only traffic
+- **No external exposure**: Firewall should block external access by default
+
+**If remote scraping is required**: Use SSH port forwarding or VPN. The metrics endpoint is not designed for direct external exposure.
+
+This is a deliberate design choice, not a limitation.
+
 ### Documentation
 
 Real documentation was written.
@@ -79,11 +92,15 @@ Sentinel is not a database.
 
 ### No Machine Learning
 
-Detection is threshold-based. Deterministic. Boring.
+Sentinel intentionally avoids heuristic or ML-based detection.
 
-If you want ML-based anomaly detection, use Fail2Ban with some Python script that calls OpenAI.
+The focus is deterministic threshold-based logic. This ensures:
+- Predictable behavior
+- No training data requirements
+- No false positives from model drift
+- Transparent decision-making
 
-I'm not interested.
+Complexity is a security risk. Simple thresholds work.
 
 ---
 
@@ -132,7 +149,7 @@ These are not bugs. They are design decisions.
 
 ## Migration Guide
 
-### From v1.0.x to v1.1.0
+### From v1.0.2 to v1.1.0
 
 **No breaking changes.**
 
@@ -190,15 +207,10 @@ The answer is now: `curl http://127.0.0.1:9105/metrics`
 ### Via Git
 
 ```bash
+cd sentinel-ssh
 git pull origin main
 git checkout v1.1.0
-sudo systemctl restart sentinel-ssh
-```
-
-### Via pip
-
-```bash
-pip install --upgrade sentinel-ssh
+pip install -e .
 sudo systemctl restart sentinel-ssh
 ```
 
