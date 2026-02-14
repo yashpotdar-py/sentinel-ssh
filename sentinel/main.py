@@ -36,7 +36,6 @@ def main():
     processing SSH logs from systemd.
     """
     set_gauge("sentinel_up", 1)  # Mark the service as up
-    render()  # Initial render to show the banner and initial metrics
     try:
         config = load_config()
     except Exception as e:  # pylint: disable=broad-exception-caught
@@ -64,8 +63,6 @@ def main():
                 block_ip(alert["ip"], block_duration, allowlist)
 
             unblock_expired()
-
-            print(render(), flush=True)  # Update metrics display after each event
 
     except KeyboardInterrupt:
         logger.info("Shutting down gracefully...")

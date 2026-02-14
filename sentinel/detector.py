@@ -7,6 +7,7 @@ Monitors failed logins and flags suspicious IPs based on thresholds.
 
 import logging
 from sentinel.state import EventState  # Import the event state tracker
+from sentinel.metrics import inc_counter
 
 # Global state for tracking events per IP in a 60-second window
 state = EventState(window_seconds=60)
@@ -26,6 +27,9 @@ def process_event(event: dict) -> dict | None:
     # Only care about failed auth events
     if event["event"] not in ("auth_failed", "invalid_user"):
         return None
+    
+    # Increment total failed attempts metric
+    inc_counter("ssh_failed_attempts_total")
 
     # Record the event and get current count for this IP
     count = state.record(event["ip"])
